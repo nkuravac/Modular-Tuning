@@ -5,9 +5,6 @@ format long
 
 delete *.txt *.fig *.png
 
-%to do: test "true" minimum energy per distance, not just along each
-%parameter
-
 fsize = 20;
 ang_rot = 0;
 mu = 0.93; 
@@ -30,17 +27,15 @@ opti_blob_size_on_cell_body = 0.375*ds_on_cell_body;
         [r_cb,con_pt] = FibonacciSphereCartesian(n_body,r); 
         new_body = r_cb;
 
+opt_arclen_purcell_previous=9.648*r;
 opt_wave_length_purcell_previous=3.687*r;
 opt_hrad_purcell_previous=0.5695*r;
-opt_arclen_purcell_previous=9.648*r;
 
-opt_wl_energy_previous=3.95*r;
-opt_hrad_energy_previous=0.5*r;
-opt_arclen_energy_previous=12*r;
+wave_length_array=[linspace(0.5*r,12*r,11) opt_wave_length_purcell_previous];
+wave_length_array=sort(wave_length_array,"descend");
 
-wave_length_array=[opt_wave_length_purcell_previous opt_wl_energy_previous];
-hrad_array=[opt_hrad_purcell_previous,opt_hrad_energy_previous];
-arclen_array=[opt_arclen_purcell_previous,opt_arclen_energy_previous];
+hrad_array=repmat(opt_hrad_purcell_previous,length(wave_length_array),1);
+arclen_array=repmat(opt_arclen_purcell_previous,length(wave_length_array),1);
 
 base_freq=154;
 
@@ -58,7 +53,7 @@ freq_array=energy_per_dist;
 ts_y_ints=energy_per_dist;
 ts_x_ints=energy_per_dist;
 
-bigdir = ['./power_curve_test',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
+bigdir = ['../../data/power_curve_wavelength',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
 mkdir(bigdir)
 
 [~,~,~,base_torque_vec,~,~,~,~,~,~,~,~,~] = simulate_bacterium(bigdir,new_body,base_freq,opt_wave_length_purcell_previous,opt_hrad_purcell_previous,r,ds_on_cell_body,opti_blob_size_on_cell_body,opt_arclen_purcell_previous,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
@@ -115,6 +110,56 @@ writematrix(purcell_ineff,[bigdir,'/purcell_ineff.txt'])
 writematrix(power_output,[bigdir,'/power_output.txt'])
 
 %% 
+
+%figure('Theme','light')
+hold on
+brgrad=color_gradient([0 0 1],[1 0 0],n_loadlines);
+for i=1:n_loadlines
+   plot([0 freq_array(i,i)],[0 ex_load_line_slopes(i)*freq_array(i,i)],"Color",brgrad(i,:),"LineStyle","-")
+end
+for j=1:n_tslines
+    plot([0 ts_x_ints(j)],[ts_y_ints(j) 0],"Color","#33ffaa")
+end
+fplot(@(x) base_torque*base_freq/x,[30 400],'Color','k')
+xlabel("$\Omega_m/(2\pi)$ (Hz)","Interpreter","latex")
+ylabel("$\tau$ (pN$\cdot$nm)","Interpreter","latex")
+%saveas(gcf,[bigdir,'/ts_and_load_lines'])
+%exportgraphics(gcf,[bigdir,'/ts_and_load_lines_wl.png'])
+saveas(gcf,[bigdir,'/ts_and_load_lines_wl.png'])
+hold off
+
+[min_energy_per_dist_on_power_curve,min_energy_per_dist_on_power_curve_index]=min(diag(energy_per_dist));
+e_per_d_wl=fopen([bigdir,'/min_energy_summary.txt'],"w");
+fprintf(e_per_d_wl,'The minimum energy cost per distance on the fixed power curve is %12.4g\n. The corresponding load line has wavelength %12.4g micrometers or %12.4g *r.\n r=%12.4g',min_energy_per_dist_on_power_curve,wave_length_array(min_energy_per_dist_on_power_curve_index),wave_length_array(min_energy_per_dist_on_power_curve_index)/r,r);
+fclose(e_per_d_wl);
+
+[max_speed_on_power_curve,max_speed_on_power_curve_index]=min(-diag(U_full_bacterium));
+max_speed_on_power_curve=abs(max_speed_on_power_curve);
+U_max_wl=fopen([bigdir,'/max_speed_summary.txt'],"w");
+fprintf(U_max_wl,'The maximum speed on the fixed power curve is %12.4g\n. The corresponding load line has wavelength %12.4g micrometers or %12.4g *r.\n r=%12.4g',max_speed_on_power_curve,wave_length_array(max_speed_on_power_curve_index),wave_length_array(max_speed_on_power_curve_index)/r,r);
+fclose(U_max_wl);
+
+[min_ineff_on_power_curve,min_ineff_on_power_curve_index]=min(diag(purcell_ineff));
+min_ineff_on_power_curve=abs(min_ineff_on_power_curve);
+min_ineff_wl=fopen([bigdir,'/ineff_summary.txt'],"w");
+fprintf(min_ineff_wl,'The minimum Purcell inefficiency on the fixed power curve is %12.4g\n. The corresponding load line has wavelength %12.4g micrometers or %12.4g *r.\n The Purcell inefficiency at the intersection of the energy-per-distance-minimizing load line and the fixed power curve is %12.4g\n r=%12.4g',min_ineff_on_power_curve,wave_length_array(min_ineff_on_power_curve_index),wave_length_array(min_ineff_on_power_curve_index)/r,purcell_ineff(min_energy_per_dist_on_power_curve_index,min_energy_per_dist_on_power_curve_index),r);
+fclose(min_ineff_wl);
+
+%figure('Theme','light')
+[min_energy_per_dist_col,min_energy_per_dist_col_index]=min(energy_per_dist);
+plot(wave_length_array(min_energy_per_dist_col_index)/r,min_energy_per_dist_col,"LineStyle","none","Marker",".","Color","k")
+xline(wave_length_array(min_ineff_on_power_curve_index)/r,"Color","g","Label","Optimal wavelength","LabelVerticalAlignment","middle")
+xlabel("\lambda/r")
+ylabel("Energy per distance (10^{-12} J/m)")
+%saveas(gcf,[bigdir,'/min_energy_per_dist_vs_wl'])
+%exportgraphics(gcf,[bigdir,'/min_energy_per_dist_vs_wl.png'])
+saveas(gcf,[bigdir,'/min_energy_per_dist_vs_wl.png'])
+
+plot(wave_length_array/r,diag(energy_per_dist))
+xline(wave_length_array(min_ineff_on_power_curve_index)/r,"Color","g","Label","Purcell-inefficiency-minimizing wavelength","LabelVerticalAlignment","middle")
+xlabel("\lambda/r")
+ylabel("Energy per distance (10^{-12} J/m)")
+saveas(gcf,[bigdir,'/energy_per_dist_vs_wl.png'])
 
 %{
 figure
@@ -176,10 +221,3 @@ ylabel("$\tau\Omega$ (pN$\cdot$ nm/s)",'Interpreter','latex')
 saveas(gcf,[bigdir,'/power_output_vs_arclen'])
 exportgraphics(gcf,[bigdir,'/power_output_vs_arclen.png'])
 %}
-
-%% 
-function G = color_gradient(color1,color2,n)
-    rgbcolor1=color1;
-    rgbcolor2=color2;
-    G = [linspace(rgbcolor1(1),rgbcolor2(1),n)',linspace(rgbcolor1(2),rgbcolor2(2),n)',linspace(rgbcolor1(3),rgbcolor2(3),n)'];
-end

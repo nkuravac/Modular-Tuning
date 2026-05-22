@@ -5,6 +5,9 @@ format long
 
 delete *.txt *.fig *.png
 
+%% 
+
+
 %MAKE SURE TO SAVE MATRIX OF DATA!! NOT JUST PLOT!!
 
 fsize = 20;
@@ -35,7 +38,7 @@ opt_arclen_purcell_previous=9.648*r;
 opt_wave_length_purcell_previous=3.687*r;
 opt_hrad_purcell_previous=0.5695*r;
 
-bigdir = ['./energy_optimize_',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
+bigdir = ['../../data/energy_optimize_',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
 mkdir(bigdir)
 
 [~,~,~,base_torque_vec,~,~,~,~,~,~,~,~,~] = simulate_bacterium(bigdir,new_body,base_freq,opt_wave_length_purcell_previous,opt_hrad_purcell_previous,r,ds_on_cell_body,opti_blob_size_on_cell_body,opt_arclen_purcell_previous,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
@@ -65,8 +68,4 @@ function energy_per_dist = Energy_per_distance_fixed_power(base_freq,power,bigdi
     energy_per_dist=abs(avg_sumTf(3)*(freq*2*pi)/avg_U_net_calc(3));
 end
 
-function ineff = Purcell_inefficiency(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase)
-    [~,~,avg_sumFf,avg_sumTf,~,~,~,~,~,~,~,avg_U_net_calc,~]=simulate_bacterium(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
-    ineff=abs(avg_sumTf(3)*(freq*2*pi)/(avg_sumFf(3)*avg_U_net_calc(3)));
-end
 

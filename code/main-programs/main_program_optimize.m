@@ -31,7 +31,7 @@ freq=154;
         new_body = r_cb;
 
 
-bigdir = ['./ineff_optimize_',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
+bigdir = ['../../data/ineff_optimize_',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
 mkdir(bigdir)
 
 %% 
@@ -77,7 +77,7 @@ saveas(gcf,[bigdir,'/purcell_ineff_heatmap_freq_',num2str(2*pi*freq),'_arclen_',
 surf(wave_length_array/r,hrad_array/r,ineff_array(:,:,i_al)');
 view(0,90);
 colorbar;
-caxis([0,400]);
+clim([0,400]);
 xlabel("\lambda/r")
 ylabel("R/r")
 saveas(gcf,[bigdir,'/modified_purcell_ineff_heatmap_freq_',num2str(2*pi*freq),'_arclen_',num2str(arclen_array(i_al)),'.png'])
@@ -92,11 +92,5 @@ colorbar;
 xlabel("\lambda/r")
 ylabel("R/r")
 saveas(gcf,[bigdir,'/truncated_',num2str(ineff_cap),'_purcell_ineff_heatmap_freq_',num2str(2*pi*freq),'_arclen_',num2str(arclen_array(i_al)),'.png'])
-end
-
-%% 
-function ineff = Purcell_inefficiency(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase)
-    [~,~,avg_sumFf,avg_sumTf,~,~,~,~,~,~,~,avg_U_net_calc,~]=simulate_bacterium(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
-    ineff=abs(avg_sumTf(3)*(freq*2*pi)/(avg_sumFf(3)*avg_U_net_calc(3)));
 end
 

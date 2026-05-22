@@ -31,18 +31,19 @@ opt_arclen_purcell_previous=9.648*r;
 opt_wave_length_purcell_previous=3.687*r;
 opt_hrad_purcell_previous=0.5695*r;
 
-hrad_array=[linspace(0.2*r,0.8*r,11) opt_hrad_purcell_previous];
-hrad_array=sort(hrad_array);
 
-arclen_array=repmat(opt_arclen_purcell_previous,length(hrad_array),1);
-wave_length_array=repmat(opt_wave_length_purcell_previous,length(hrad_array),1);
+arclen_array=[linspace(4*r,20*r,11) opt_arclen_purcell_previous];
+arclen_array=sort(arclen_array,"descend");
+
+hrad_array=repmat(opt_hrad_purcell_previous,length(arclen_array),1);
+wave_length_array=repmat(opt_wave_length_purcell_previous,length(arclen_array),1);
 
 base_freq=154;
 
-n_loadlines=length(hrad_array);
-n_tslines=length(hrad_array);
+n_loadlines=length(arclen_array);
+n_tslines=length(arclen_array);
 
-energy_per_dist = zeros(length(hrad_array),1);
+energy_per_dist = zeros(length(arclen_array),1);
 U_full_bacterium = energy_per_dist;
 flag_torque = energy_per_dist;
 E_per_d_per_freq=energy_per_dist;
@@ -53,7 +54,7 @@ freq_array=energy_per_dist;
 ts_y_ints=energy_per_dist;
 ts_x_ints=energy_per_dist;
 
-bigdir = ['./power_curve_hrad',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
+bigdir = ['../../data/power_curve_arclen',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
 mkdir(bigdir)
 
 [~,~,~,base_torque_vec,~,~,~,~,~,~,~,~,~] = simulate_bacterium(bigdir,new_body,base_freq,opt_wave_length_purcell_previous,opt_hrad_purcell_previous,r,ds_on_cell_body,opti_blob_size_on_cell_body,opt_arclen_purcell_previous,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
@@ -122,46 +123,40 @@ fplot(@(x) base_torque*base_freq/x,[30 400],'Color','k')
 xlabel("$\Omega_m/(2\pi)$ (Hz)","Interpreter","latex")
 ylabel("$\tau$ (pN$\cdot$nm)","Interpreter","latex")
 %saveas(gcf,[bigdir,'/ts_and_load_lines'])
-%exportgraphics(gcf,[bigdir,'/ts_and_load_lines_hrad.png'])
-saveas(gcf,[bigdir,'/ts_and_load_lines_hrad.png'])
+%exportgraphics(gcf,[bigdir,'/ts_and_load_lines_arclen.png'])
+saveas(gcf,[bigdir,'/ts_and_load_lines.png'])
 hold off
 
 [min_energy_per_dist_on_power_curve,min_energy_per_dist_on_power_curve_index]=min(diag(energy_per_dist));
 
 [min_ineff_on_power_curve,min_ineff_on_power_curve_index]=min(diag(purcell_ineff));
 min_ineff_on_power_curve=abs(min_ineff_on_power_curve);
-min_ineff_hrad=fopen([bigdir,'/ineff_summary.txt'],"w");
-fprintf(min_ineff_hrad,'The minimum Purcell inefficiency on the fixed power curve is %12.4g\n. The corresponding load line has helical radius %12.4g micrometers or %12.4g *r.\n The Purcell inefficiency at the intersection of the energy-per-distance-minimizing load line and the fixed power curve is %12.4g\n r=%12.4g',min_ineff_on_power_curve,hrad_array(min_ineff_on_power_curve_index),hrad_array(min_ineff_on_power_curve_index)/r,purcell_ineff(min_energy_per_dist_on_power_curve_index,min_energy_per_dist_on_power_curve_index),r);
-fclose(min_ineff_hrad);
+min_ineff_arclen=fopen([bigdir,'/ineff_summary.txt'],"w");
+fprintf(min_ineff_arclen,'The minimum Purcell inefficiency on the fixed power curve is %12.4g\n. The corresponding load line has arclength %12.4g micrometers or %12.4g *r.\n The Purcell inefficiency at the intersection of the energy-per-distance-minimizing load line and the fixed power curve is %12.4g\n r=%12.4g',min_ineff_on_power_curve,arclen_array(min_ineff_on_power_curve_index),arclen_array(min_ineff_on_power_curve_index)/r,purcell_ineff(min_energy_per_dist_on_power_curve_index,min_energy_per_dist_on_power_curve_index),r);
+fclose(min_ineff_arclen);
 
 [min_energy_per_dist_col,min_energy_per_dist_col_index]=min(energy_per_dist);
-plot(hrad_array(min_energy_per_dist_col_index)/r,min_energy_per_dist_col,"LineStyle","none","Marker",".")
-xlabel("R/r")
+plot(arclen_array(min_energy_per_dist_col_index)/r,min_energy_per_dist_col,"LineStyle","none","Marker",".")
+xlabel("S/r")
 ylabel("Energy per distance (10^{-12} J/m)")
-xline(hrad_array(min_ineff_on_power_curve_index)/r,"Label","Optimal helical radius","Color",'g')
-%saveas(gcf,[bigdir,'/min_energy_per_dist_vs_hrad'])
-%exportgraphics(gcf,[bigdir,'/min_energy_per_dist_vs_hrad.png'])
-saveas(gcf,[bigdir,'/min_energy_per_dist_vs_hrad.png'])
+xline(arclen_array(min_ineff_on_power_curve_index)/r,"Label","Optimal arclength","Color",'g')
+%saveas(gcf,[bigdir,'/min_energy_per_dist_vs_arclen'])
+%exportgraphics(gcf,[bigdir,'/min_energy_per_dist_vs_arclen.png'])
+saveas(gcf,[bigdir,'/min_energy_per_dist_vs_arclen.png'])
 
-e_per_d_hrad=fopen([bigdir,'/min_energy_summary.txt'],"w");
-fprintf(e_per_d_hrad,'The minimum energy cost per distance on the fixed power curve is %12.4g\n. The corresponding load line has helical radius %12.4g micrometers or %12.4g *r.',min_energy_per_dist_on_power_curve,hrad_array(min_energy_per_dist_on_power_curve_index),hrad_array(min_energy_per_dist_on_power_curve_index)/r);
-fclose(e_per_d_hrad);
+
+e_per_d_arclen=fopen([bigdir,'/min_energy_summary.txt'],"w");
+fprintf(e_per_d_arclen,'The minimum energy cost per distance on the fixed power curve is %12.4g\n. The corresponding load line has arclength %12.4g micrometers or %12.4g *r.\n r=%12.4g',min_energy_per_dist_on_power_curve,arclen_array(min_energy_per_dist_on_power_curve_index),arclen_array(min_energy_per_dist_on_power_curve_index)/r,r);
+fclose(e_per_d_arclen);
 
 [max_speed_on_power_curve,max_speed_on_power_curve_index]=min(-diag(U_full_bacterium));
 max_speed_on_power_curve=abs(max_speed_on_power_curve);
-U_max_hrad=fopen([bigdir,'/max_speed_summary.txt'],"w");
-fprintf(U_max_hrad,'The maximum speed on the fixed power curve is %12.4g\n. The corresponding load line has arclength %12.4g micrometers or %12.4g *r.',max_speed_on_power_curve,hrad_array(max_speed_on_power_curve_index),hrad_array(max_speed_on_power_curve_index)/r);
-fclose(U_max_hrad);
+U_max_arclen=fopen([bigdir,'/max_speed_summary.txt'],"w");
+fprintf(U_max_arclen,'The maximum speed on the fixed power curve is %12.4g\n. The corresponding load line has arclength %12.4g micrometers or %12.4g *r.\n r=%12.4g',max_speed_on_power_curve,arclen_array(max_speed_on_power_curve_index),arclen_array(max_speed_on_power_curve_index)/r,r);
+fclose(U_max_arclen);
 
-plot(hrad_array/r,diag(energy_per_dist))
-xline(hrad_array(min_ineff_on_power_curve_index)/r,"Color","g","Label","Purcell-inefficiency-minimizing radius","LabelVerticalAlignment","middle")
-xlabel("R/r")
+plot(arclen_array/r,diag(energy_per_dist))
+xline(arclen_array(min_ineff_on_power_curve_index)/r,"Color","g","Label","Purcell-inefficiency-minimizing arc length","LabelVerticalAlignment","middle")
+xlabel("S/r")
 ylabel("Energy per distance (10^{-12} J/m)")
-saveas(gcf,[bigdir,'/energy_per_dist_vs_hrad.png'])
-
-%% 
-function G = color_gradient(color1,color2,n)
-    rgbcolor1=color1;
-    rgbcolor2=color2;
-    G = [linspace(rgbcolor1(1),rgbcolor2(1),n)',linspace(rgbcolor1(2),rgbcolor2(2),n)',linspace(rgbcolor1(3),rgbcolor2(3),n)'];
-end
+saveas(gcf,[bigdir,'/energy_per_dist_vs_arclen.png'])
