@@ -1,2 +1,6 @@
-# Modular-Tuning
-For the project on modular tuning of geometry and motor characteristics of mono-flagellated bacteria in viscous fluid.
+# Modular Tuning in Bacterial Motility
+This project, advised by Dr. Shindell and Dr. Nguyen at Trinity University, explores how the physical characteristics of a bacterium affect its ability to efficiently move through fluid. We focus on bacteria with a single helical flagellum that is rotated by a biological motor. These motors allow bacteria to swim toward nutrients and away from adverse conditions. Consequently, swimming efficiency is an important gauge of a bacterium’s fitness with respect to its environment. Measures of swimming efficiency, including motor power output and energy cost per distance, are directly influenced by physical factors like flagellar geometry and motor characteristics.
+
+We use the [Method of Regularized Stokeslets](./references/1_method_of_regularized_Stoketslets.pdf) to simulate the motion of a bacterium through viscous fluid. The model bacterium consists of a spherical cell body with a helical flagellum. The geometric parameters varied in our investigation are the radius, wavelength, and arclength of the helix. We also vary the torque-speed curve of the motor, which summarizes all of its relevant characteristics. 
+
+Initial results were presented at Trinity's 2025 Summer Symposium, and the presentation can be found [here](./reports/Efficiency_of_physical_characteristics_in_bacterial_motility.pdf).
