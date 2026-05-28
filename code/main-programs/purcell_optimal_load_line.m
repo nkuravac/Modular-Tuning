@@ -1,0 +1,34 @@
+fsize = 20;
+ang_rot = 0;
+mu = 0.93; 
+filament_radius = 0.012;
+blob_size_on_flag = 2.139*filament_radius;
+n_body=1000;
+
+num_phase = 16;
+
+rad_st = .44;
+cell_a = rad_st;
+pill_height=2.2;
+ds_on_cell_body = sqrt(4*pi*cell_a^2/n_body);
+opti_blob_size_on_cell_body = 0.375*ds_on_cell_body;
+base_freq=154;
+
+%%%build a cell body
+r=sqrt(cell_a*pill_height/2); %same surf area as pill
+[r_cb,con_pt] = FibonacciSphereCartesian(n_body,r); 
+new_body = r_cb;
+
+%optimal parameters for purcell inefficiency:
+opt_arclen_purcell_previous=9.648*r;
+opt_wl_purcell_previous=3.687*r;
+opt_hrad_purcell_previous=0.5695*r;
+
+%load line specs
+bigdir = ['../../data/ineff_load_line_raw',char(datetime('now','Format','MM-dd-yyyy_HH-mm'))];
+mkdir(bigdir)
+
+[~,~,~,~,avg_sumFb,avg_sumTb,~,~,~,~,~,avg_U_net_calc,~]=simulate_bacterium(bigdir,new_body,base_freq,opt_wl_purcell_previous,opt_hrad_purcell_previous,r,ds_on_cell_body,opti_blob_size_on_cell_body,opt_arclen_purcell_previous,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
+opt_ineff_row=[opt_arclen_purcell_previous,opt_wl_purcell_previous,opt_hrad_purcell_previous,avg_sumFb(3),avg_sumTb(3),avg_U_net_calc(3)];
+opt_ineff_row(4:end)=opt_ineff_row(4:end)/base_freq;
+writematrix(opt_ineff_row,'../../data/opt_ineff_row.txt')

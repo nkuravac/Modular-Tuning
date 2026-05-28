@@ -36,18 +36,23 @@ mkdir(bigdir)
 
 %% 
 
-purcell_ineff=@(x) Purcell_inefficiency(bigdir,new_body,freq,x(1),x(2),r,ds_on_cell_body,opti_blob_size_on_cell_body,x(3),blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
+rawdir=[bigdir,'/raw'];
+mkdir(rawdir)
+summarydir=[bigdir,'/summary'];
+mkdir(summarydir)
+
+purcell_ineff=@(x) Purcell_inefficiency(rawdir,new_body,freq,x(1),x(2),r,ds_on_cell_body,opti_blob_size_on_cell_body,x(3),blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase);
 [x_purcell_min,min_ineff]=fmincon(purcell_ineff,[3.3938,0.485,10],[],[],[],[],[0.3*r,0.1*r,4],[12*r,0.8*r,20]);
 opt_wl_purcell=x_purcell_min(1);
 opt_hrad_purcell=x_purcell_min(2);
 opt_arclen_purcell=x_purcell_min(3);
 
-opt_ineff=fopen([bigdir,'/optimal_parameters_purcell_ineff.txt'],"w");
+opt_ineff=fopen([summarydir,'/optimal_parameters_purcell_ineff.txt'],"w");
 fprintf(opt_ineff,'The minimum Purcell inefficiency is %12.4g.\n The optimal wavelength is %12.4g micrometers or %12.4g*r.\n The optimal helical radius is %12.4g micrometers or %12.4g*r.\n The optimal arclength is %12.4g micrometers or %12.4g*r.\n',min_ineff,opt_wl_purcell,opt_wl_purcell/r,opt_hrad_purcell,opt_hrad_purcell/r,opt_arclen_purcell,opt_arclen_purcell/r);
 fclose(opt_ineff);
 
 %% 
-
+%{
 wave_length_array=linspace(opt_wl_purcell-3*r,opt_wl_purcell+3*r,21);
 hrad_array=linspace(opt_hrad_purcell-0.3*r,opt_hrad_purcell+0.3*r,21);
 arclen_array=linspace(opt_arclen_purcell-4*r,opt_arclen_purcell+4*r,5);
@@ -57,16 +62,18 @@ ineff_array=zeros(length(wave_length_array),length(hrad_array),length(arclen_arr
 for i_al=1:length(arclen_array)
     arclen=arclen_array(i_al);
     for i_wl=1:length(wave_length_array)
-        wave_length=wave_length_array(i_wl);
         for i_hr=1:length(hrad_array)
-            R=hrad_array(i_hr);
     
-            ineff_array(i_wl,i_hr,i_al)=purcell_ineff([wave_length,R,arclen]);
+            ineff_array(i_wl,i_hr,i_al)=purcell_ineff([wave_length_array(i_wl),hrad_array(i_hr),arclen_array(i_al)]);
 
         end
     end
-writematrix(ineff_array,[bigdir,'/ineff_array_arclen_',num2str(arclen),'.txt'])
+writematrix(ineff_array(:,:,i_al),[outputdir,'/ineff_array_arclen_',num2str(arclen),'.txt'])
+%}
 
+%following code is for plotting heat maps of Purcell inefficiency vs.
+%wavelength and helical radius at each arc length.
+%{
 surf(wave_length_array/r,hrad_array/r,ineff_array(:,:,i_al)');
 view(0,90);
 colorbar;
@@ -92,5 +99,7 @@ colorbar;
 xlabel("\lambda/r")
 ylabel("R/r")
 saveas(gcf,[bigdir,'/truncated_',num2str(ineff_cap),'_purcell_ineff_heatmap_freq_',num2str(2*pi*freq),'_arclen_',num2str(arclen_array(i_al)),'.png'])
-end
 
+
+end
+%}

@@ -48,6 +48,7 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
 
             
             %%%plot cell body + flagellum
+            %{
             if phase == 1
                 fig1=figure('Visible','off'); %,'Theme','Light'
                 axes('fontsize',fsize)
@@ -60,7 +61,7 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
                 plot3(flagellum(:,1),flagellum(:,2),flagellum(:,3),'-g','linewidth',2)
                 saveas(fig1,[dir,'/cell_rad_',num2str(r),'_wavelength_',num2str(wave_length),'_helix_rad_',num2str(R),'_full_cell.png'])
             end
-            
+            %}
 
 
             %%%rotate cell body
