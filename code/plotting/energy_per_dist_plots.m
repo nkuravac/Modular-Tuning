@@ -6,9 +6,6 @@ translational_speeds=full_sweep_data(:,6);
 dir='../../reports/figures/energy_per_dist_plots';
 if(~exist(dir,'dir'))
     mkdir(dir)
-else
-    rmdir(dir,'s')
-    mkdir(dir)
 end
 
 %%
