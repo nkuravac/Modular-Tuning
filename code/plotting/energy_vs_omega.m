@@ -23,6 +23,8 @@ omega=sqrt(power./torque_slopes); %int between load line (linear with slope torq
 energy_per_dist=power./(full_sweep_data(:,6).*omega); %E per dist at that int
 %energy_per_dist=torque_slopes.*omega./speed_slopes; %equivalent way to calculate E per dist at int
 
+purcell_ineff=torque_slopes./(speed_slopes.*full_sweep_data(:,4));
+
 
 %%
 %plot all of the load lines
@@ -54,6 +56,7 @@ hold off
 disp('---------------------')
 disp(['The two nearest load line slopes are ',num2str(torque_slopes(min_diff_index),10),' and ',num2str(torque_slopes(min_diff_index+1),10)])
 disp(['The energy per distance values at the intersections of these two load lines with a curve of constant power ',num2str(power), ' are ', num2str(energy_per_dist(min_diff_index)), ' and ', num2str(energy_per_dist(min_diff_index+1))])
+disp(['The purcell inefficiency values at the intersections of these two load lines with a curve of constant power ',num2str(power), ' are ', num2str(purcell_ineff(min_diff_index)), ' and ', num2str(purcell_ineff(min_diff_index+1))])
 
 min(torque_slopes)
 torque_slopes(opt_ineff_index)

@@ -20,6 +20,7 @@ r=sqrt(cell_a*pill_height/2); %same surf area as pill
 new_body = r_cb;
 
 %optimal parameters for purcell inefficiency:
+
 opt_arclen_purcell_previous=9.648*r;
 opt_wl_purcell_previous=3.687*r;
 opt_hrad_purcell_previous=0.5695*r;
