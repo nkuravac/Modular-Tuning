@@ -47,8 +47,18 @@ opt_wl_purcell=x_purcell_min(1);
 opt_hrad_purcell=x_purcell_min(2);
 opt_arclen_purcell=x_purcell_min(3);
 
+opt_ineff_struct.Minimum_Purcell_inefficiency=min_ineff;
+opt_ineff_struct.r=r;
+opt_ineff_struct.Wavelength=opt_wl_purcell;
+opt_ineff_struct.Helix_radius=opt_hrad_purcell;
+opt_ineff_struct.Arc_length=opt_arclen_purcell;
+
+opt_ineff_json=fopen([summarydir,'/optimal_parameters_purcell_ineff.json'],'w');
+fprintf(opt_ineff_json,jsonencode(opt_ineff_struct));
+fclose(opt_ineff_json);
+
 opt_ineff=fopen([summarydir,'/optimal_parameters_purcell_ineff.txt'],"w");
-fprintf(opt_ineff,'The minimum Purcell inefficiency is %12.4g.\n The optimal wavelength is %12.4g micrometers or %12.4g*r.\n The optimal helical radius is %12.4g micrometers or %12.4g*r.\n The optimal arclength is %12.4g micrometers or %12.4g*r.\n',min_ineff,opt_wl_purcell,opt_wl_purcell/r,opt_hrad_purcell,opt_hrad_purcell/r,opt_arclen_purcell,opt_arclen_purcell/r);
+fprintf(opt_ineff,'The minimum Purcell inefficiency is %12.9g.\n The optimal wavelength is %12.9g micrometers or %12.9g*r.\n The optimal helical radius is %12.9g micrometers or %12.9g*r.\n The optimal arclength is %12.9g micrometers or %12.9g*r.\n',min_ineff,opt_wl_purcell,opt_wl_purcell/r,opt_hrad_purcell,opt_hrad_purcell/r,opt_arclen_purcell,opt_arclen_purcell/r);
 fclose(opt_ineff);
 
 %% 

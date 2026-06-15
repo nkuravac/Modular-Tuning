@@ -20,8 +20,8 @@ blob_size_on_flag = 2.139*filament_radius;
 num_phase = 16;
 
 Ls = 8.3; %8.3 +/- 2.0
-R = 0.2; %radius of helix  0.39 +/- 0.05
-freq = 269.21;  %154 +/- 30   %Table 3 in Darnton et al.
+R = 0.39; %radius of helix  0.39 +/- 0.05
+freq = 226;  %154 +/- 30   %Table 3 in Darnton et al.
 height_a = 2.5;  %2.5 +/- 0.6
 
 %wave_length = 2.22 - 0.2; %2.22 +/- 0.2

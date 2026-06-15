@@ -1,4 +1,4 @@
-full_sweep_data=table2array(readtable("../../data/full_sweep_table.txt"));
+full_sweep_data=table2array(readtable("../../data/fuller_sweep_table.txt"));
 forces=full_sweep_data(:,4);
 torques=full_sweep_data(:,5);
 translational_speeds=full_sweep_data(:,6);
@@ -49,8 +49,10 @@ ylabel('Purcell inefficiency')
 exportgraphics(gca,[dir,'/ineff_vs_radius.png'])
 
 %%
-num_torques=[20,30,50,70,100];
-bundle_width=[0.1,0.25,0.5,0.9];
+%num_torques=[20,30,50,70,100];
+%bundle_width=[0.1,0.25,0.5,0.9];
+num_torques=30;
+bundle_width=0.5;
 
 torque_bundle_dir=[dir,'/ineff_vs_torque_slope'];
 if(~exist(torque_bundle_dir,'dir'))
