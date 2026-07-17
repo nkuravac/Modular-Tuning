@@ -1,5 +1,12 @@
 function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,avg_Omega_model,avg_Omega_cell_body_calc,avg_Omega_flag_calc,avg_Omega_net_calc,avg_U_net_calc,tmp] = simulate_bacterium(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase)
     
+    %Simulate a bacterium swimming in free space using the Method of Regularized Stokeslets
+    
+    %Inputs: model cell parameters (geometric and computational)
+    
+    %Outputs: net force, torque, and angular velocity for each of the 
+    %full model, the cell body, and the flagellum, also speed of the model.
+
     dir = [bigdir,'/freq_',num2str(freq),'_wl_',num2str(wave_length),'_hr_',num2str(R)];
         if(~exist(dir,'dir'))
             mkdir(dir)
