@@ -1,13 +1,17 @@
-function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,avg_Omega_model,avg_Omega_cell_body_calc,avg_Omega_flag_calc,avg_Omega_net_calc,avg_U_net_calc,tmp] = simulate_bacterium(bigdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase)
+function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,avg_Omega_model,avg_Omega_cell_body_calc,avg_Omega_flag_calc,avg_Omega_net_calc,avg_U_net_calc,tmp] = simulate_bacterium_z_shift(z_shift,rawdir,new_body,freq,wave_length,R,r,ds_on_cell_body,opti_blob_size_on_cell_body,arclen,blob_size_on_flag,n_body,filament_radius,mu,ang_rot,fsize,num_phase)
     
-    %Simulate a bacterium swimming in free space using the Method of Regularized Stokeslets
-    
-    %Inputs: model cell parameters (geometric and computational)
-    
-    %Outputs: net force, torque, and angular velocity for each of the 
-    %full model, the cell body, and the flagellum, also speed of the model.
+%a modification to simulate_bacterium.m - this program places the first point of the flagellum
+%some distance z_shift away from the last point of the cell body in order
+%to test flow interaction between the body and flagellum.
 
-    dir = [bigdir,'/freq_',num2str(freq),'_wl_',num2str(wave_length),'_hr_',num2str(R)];
+%Simulate a bacterium swimming in free space using the Method of Regularized Stokeslets
+
+%Inputs: model cell parameters (geometric and computational)
+
+%Outputs: net force, torque, and angular velocity for each of the 
+%full model, the cell body, and the flagellum, also speed of the model.
+
+    dir = [rawdir,'/z_shift_',num2str(z_shift),'_freq_',num2str(freq),'_wl_',num2str(wave_length),'_hr_',num2str(R)];
         if(~exist(dir,'dir'))
             mkdir(dir)
         else
@@ -16,7 +20,7 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
         end   
         
         diary([dir,'/parameters.txt'])
-        r,ds_on_cell_body,opti_blob_size_on_cell_body,
+        z_shift,r,ds_on_cell_body,opti_blob_size_on_cell_body,
         freq,arclen,blob_size_on_flag,n_body,filament_radius,mu,wave_length,R
         diary off
   
@@ -44,7 +48,7 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
             [flagellum,UIB] = left_handed_arclength_helix(phase,freq,blob_size_on_flag,R,wave_length,arclen,dir);
                         
             %%%pull the cell to the helix
-            new_bodyt = move_body(new_body,flagellum);
+            new_bodyt = move_body_z_shift(new_body,flagellum,z_shift);
             new_body = new_bodyt;
             con_pt = new_body(end,:); %last point on cell body is the same as the first point on flagellum
             %first_point_on_flagellum = flagellum(1,:);
@@ -55,22 +59,22 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
 
             
             %%%plot cell body + flagellum
-            %{
+            
             if phase == 1
                 fig1=figure('Visible','off'); %,'Theme','Light'
                 axes('fontsize',fsize)
                 view(3)
                 axis equal
                 %axis off
-                hold all
+                hold on
     
                 plot3(new_body(:,1),new_body(:,2),new_body(:,3),'.r','MarkerFaceColor','r','markersize',2)
                 plot3(flagellum(:,1),flagellum(:,2),flagellum(:,3),'-g','linewidth',2)
-                saveas(fig1,[dir,'/cell_rad_',num2str(r),'_wavelength_',num2str(wave_length),'_helix_rad_',num2str(R),'_full_cell.png'])
+                saveas(fig1,[dir,'/z_shift_',num2str(z_shift),'_cell_rad_',num2str(r),'_wavelength_',num2str(wave_length),'_helix_rad_',num2str(R),'_full_cell.png'])
             end
-            %}
+            
 
-
+            %{
             %%%rotate cell body
             ind_top = find(new_body(:,3)> 2*r-0.0001 & abs(new_body(:,1)) < 0.0001 & abs(new_body(:,2)) < 0.0001);
             %{
@@ -103,6 +107,7 @@ function [avg_sumF,avg_sumT,avg_sumFf,avg_sumTf,avg_sumFb,avg_sumTb,avg_U_model,
             rot_axis = repmat([0;1;0],1,size(UIB,1));
             UIB_temp = (1 - cos(ang_rot))*repmat(dot(UIB',rot_axis),3,1).*rot_axis + cos(ang_rot)*UIB' - sin(ang_rot)*cross(rot_axis,UIB',1);
             UIB = UIB_temp';
+            %}
             
             %%%Free space
             flag_wall = 0;
